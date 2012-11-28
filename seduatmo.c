@@ -16,7 +16,7 @@
 // 
 //***************************************************************************
 
-static const char *VERSION        = "0.0.1";
+static const char *VERSION        = "0.0.2";
 static const char *DESCRIPTION    = "sedu ambi light control with data from softhddevice";
 static const char *MAINMENUENTRY  = "Seduatmo";
 
