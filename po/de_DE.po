@@ -41,7 +41,7 @@ msgid "Frequence [Hz]"
 msgstr "Frequenz (Hz)"
 
 msgid "Detect cinema bars"
-msgstr "BAlkenerkennung"
+msgstr "Balkenerkennung"
 
 msgid "Threshold"
 msgstr "Schwellwert"
