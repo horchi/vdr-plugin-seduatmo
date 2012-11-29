@@ -100,9 +100,13 @@ void cSeduThread::Action()
       else
       {
          putData();
-         wait = 500; // less load on fixed color or black 
-      }
 
+         if (cfg.viewMode != vmRainbow)
+            wait = 500;                      // less load on fixed color or black 
+         else
+            wait = 100;                     // for Rainbow sleep always 100ms
+      }
+      
       waitCondition.TimedWait(mutex, wait);  // wait time in ms
    } 
 
@@ -270,21 +274,36 @@ int cSeduThread::putData()
          return fail;
    }
 
-   if (cfg.viewMode != vmAtmo)
+   switch (cfg.viewMode)
    {
-      pFixedCol.r = cfg.viewMode == vmFixedCol ?  cfg.fixedR : 0;
-      pFixedCol.g = cfg.viewMode == vmFixedCol ?  cfg.fixedG : 0;
-      pFixedCol.b = cfg.viewMode == vmFixedCol ?  cfg.fixedB : 0;
-
-      if (cfg.viewMode != vmBlack)
+      case vmBlack:
+      case vmFixedCol:
       {
-         gammaAdj(&pFixedCol);
-         whiteAdj(&pFixedCol);
-      }
-   }
-            
-   sedu.writeStartSeq();
+         pFixedCol.r = cfg.viewMode == vmFixedCol ? cfg.fixedR : 0;
+         pFixedCol.g = cfg.viewMode == vmFixedCol ? cfg.fixedG : 0;
+         pFixedCol.b = cfg.viewMode == vmFixedCol ? cfg.fixedB : 0;
 
+         if (cfg.viewMode != vmBlack)
+         {
+            gammaAdj(&pFixedCol);
+            whiteAdj(&pFixedCol);
+         }
+
+         break;
+      }
+      case vmRainbow:
+      {
+         pFixedCol = getRainbowColor();
+
+         break;
+      }
+
+      default: 
+         break;
+   }
+   
+   sedu.writeStartSeq();
+   
    // loop over all LEDs
 
    for (int led = 0; led < cfg.ledCount; led++)
@@ -450,6 +469,94 @@ void cSeduThread::gammaAdj(Pixel* p)
       p->g = (unsigned char)(pow(p->g / 255.0, g) * 255.0);
       p->b = (unsigned char)(pow(p->b / 255.0, g) * 255.0);
    }
+}
+
+//***************************************************************************
+// Get Rainbow Color
+//***************************************************************************
+
+Pixel cSeduThread::getRainbowColor()
+{
+   static int rainbowColorTone = 0;
+   static int callCount = 0;
+
+   Pixel p = hsv2Rgb(rainbowColorTone, 1, 1);
+
+   if (!(callCount++ % (cfg.effectSpeed / 100)))
+   {   
+      if (++rainbowColorTone >= 360)
+         rainbowColorTone = 0;
+   }
+
+   gammaAdj(&p);
+   whiteAdj(&p);
+
+   return p;
+}
+
+//***************************************************************************
+// Convert from HSV to RGB
+//***************************************************************************
+
+Pixel cSeduThread::hsv2Rgb(int h, double s, double v) 
+{
+   Pixel pix = {0,0,0,0};
+   double r = 0; 
+   double g = 0; 
+   double b = 0;
+   
+   int i = floor(h/60.0);
+   double f = h/60.0 - i;
+   double pv = v * (1 - s);
+   double qv = v * (1 - s * f);
+   double tv = v * (1 - s * (1-f));
+   
+   switch (i)
+   {
+      case 0:    // rojo dominante
+         r = v;
+         g = tv;
+         b = pv;
+         break;
+
+      case 1:    // verde
+         r = qv;
+         g = v;
+         b = pv;
+         break;
+
+      case 2: 
+         r = pv;
+         g = v;
+         b = tv;
+         break;
+
+      case 3:    // azul
+         r = pv;
+         g = qv;
+         b = v;
+         break;
+
+      case 4:
+         r = tv;
+         g = pv;
+         b = v;
+         break;
+
+      case 5:    // rojo
+         r = v;
+         g = pv;
+         b = qv;
+         break;
+   }
+  
+   // set each component to a integer value between 0 and 255
+  
+   pix.r = minMax(255*r, 0, 255);
+   pix.g = minMax(255*g, 0, 255);
+   pix.b = minMax(255*b, 0, 255);
+  
+   return pix;
 }
 
 //***************************************************************************
@@ -731,7 +838,7 @@ int cSeduLine::writeColor(Pixel* p, int index)
 }
 
 //***************************************************************************
-// Checl Line
+// Check Line
 //***************************************************************************
 
 int cSeduLine::checkLine()

@@ -16,6 +16,7 @@ const char* cSeduService::viewModes[] =
 {
    "atmo",
    "fixed color",
+   "rainbow",
    "black",
    "detached",
 

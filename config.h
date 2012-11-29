@@ -48,6 +48,7 @@ class cSeduConfig : public cSeduService
       int fixedR;
       int fixedG;
       int fixedB;
+      int effectSpeed;
 
       int showMainmenu;
       char seduRGBOrder[4];

@@ -35,7 +35,6 @@ cSeduConfig::cSeduConfig()
    xDeep = 2;
    yDeep = 1;
    black = 0;
-
    detectCineBars = cbBoth;
 
    seduMode = smMiniDMX;
@@ -44,9 +43,12 @@ cSeduConfig::cSeduConfig()
 
    showMainmenu = yes;
    viewMode = vmAtmo;
+   effectSpeed = 500;
+
    fixedR = 111;
    fixedG = 101;
    fixedB = 0;
+
 
    // calculated
 

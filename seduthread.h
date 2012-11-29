@@ -1,3 +1,10 @@
+/*
+ * seduthread.h: A plugin for the Video Disk Recorder
+ *
+ * See the README file for copyright information and how to reach the author.
+ *
+ * $Id: seduthread.h,v 1.64 2012/11/28 06:29:24 wendel Exp $
+ */
 
 #include <termios.h>
 #include <queue>
@@ -23,8 +30,8 @@ class PixQueue
 {
    public:
 
-      PixQueue()             { clear(); }
-      virtual ~PixQueue()  { clear(); }
+      PixQueue()            { clear(); }
+      virtual ~PixQueue()   { clear(); }
       void clear()          { while (!pQueue.empty()) pQueue.pop(); r=g=b=0; }
       int getCount()        { return pQueue.size(); }
 
@@ -191,4 +198,7 @@ class cSeduThread : public cThread, public cSeduService
       int imageSize;
       int imageWidth;
       int imageHeight;
+
+      Pixel getRainbowColor();
+      Pixel hsv2Rgb(int h, double s, double v);
 };

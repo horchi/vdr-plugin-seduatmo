@@ -105,15 +105,17 @@ class cSeduPluginMenu : public cMenuSetupPage
 
    protected:
 
-      void Store() { }
+      void Store();
       cPluginSeduatmo* plugin;
+      int effectSpeed;
 };
 
 cSeduPluginMenu::cSeduPluginMenu(const char* title, cPluginSeduatmo* aPlugin)
 {
    SetTitle(title ? title : "");
    plugin = aPlugin;
-
+   effectSpeed = cfg.effectSpeed;
+   
    Clear();
 
    cOsdMenu::Add(new cMenuEditStraItem(tr("View Mode"), 
@@ -124,6 +126,8 @@ cSeduPluginMenu::cSeduPluginMenu(const char* title, cPluginSeduatmo* aPlugin)
    Add(new cMenuEditIntItem(tr("Fixed Color Red"), &cfg.fixedR, 0, 255));
    Add(new cMenuEditIntItem(tr("Fixed Color Green"), &cfg.fixedG, 0, 255));
    Add(new cMenuEditIntItem(tr("Fixed Color Blue"), &cfg.fixedB, 0, 255));
+
+   Add(new cMenuEditIntItem(tr("Effect Speed [ms]"), &effectSpeed, 100, 5000));
 
    SetHelp(0, 0, 0, 0);
 
@@ -146,19 +150,26 @@ eOSState cSeduPluginMenu::ProcessKey(eKeys key)
          plugin->startAtmo();
    }
 
-   if (state != osUnknown)
-      return state;
-
    if (key == kOk)
    {
-      SetupStore("FixedColorRed", cfg.fixedR);
-      SetupStore("FixedColorGreen", cfg.fixedG);
-      SetupStore("FixedColorBlue", cfg.fixedB);
-      SetupStore("ViewMode", (int)cfg.viewMode);
+      cfg.effectSpeed = effectSpeed;
+      Store();
 
       return osEnd;
    }
+
    return state;
+}
+
+void cSeduPluginMenu::Store()
+{  
+   plugin->SetupStore("FixedColorRed", cfg.fixedR);
+   plugin->SetupStore("FixedColorGreen", cfg.fixedG);
+   plugin->SetupStore("FixedColorBlue", cfg.fixedB);
+   plugin->SetupStore("ViewMode", (int)cfg.viewMode);
+   plugin->SetupStore("EffectSpeed", cfg.effectSpeed);
+
+   Setup.Save();
 }
 
 //***************************************************************************
@@ -279,6 +290,7 @@ bool cPluginSeduatmo::SetupParse(const char* Name, const char* Value)
    else if (!strcasecmp(Name, "FixedColorRed"))    cfg.fixedR = atoi(Value);
    else if (!strcasecmp(Name, "FixedColorGreen"))  cfg.fixedG = atoi(Value);
    else if (!strcasecmp(Name, "FixedColorBlue"))   cfg.fixedB = atoi(Value);
+   else if (!strcasecmp(Name, "EffectSpeed"))      cfg.effectSpeed = atoi(Value);
 
    else if (!strcasecmp(Name, "SeduMode"))         cfg.seduMode = (cSeduService::SeduMode)atoi(Value);
    else if (!strcasecmp(Name, "SeduRGBOrder"))     strcpy(cfg.seduRGBOrder, Value);
@@ -296,9 +308,6 @@ bool cPluginSeduatmo::Service(const char* Id, void* Data)
 
 cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, int &ReplyCode)
 {
-   if (!update)
-      return "Error: Plugin not initialized!";
-
    if (!strcasecmp(Command, "MODE")) 
    {
       if (Option && strcasecmp(Option, "atmo") == 0) 
@@ -314,6 +323,13 @@ cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, i
          startAtmo();
          ReplyCode = 550;
          return "fixed color activated";
+      }
+      else if (Option && strcasecmp(Option, "rainbow") == 0) 
+      {
+         cfg.viewMode = cSeduService::vmRainbow;
+         startAtmo();
+         ReplyCode = 550;
+         return "rainbow effect activated";
       }
       else if (Option && strcasecmp(Option, "black") == 0) 
       {
@@ -346,7 +362,7 @@ const char** cPluginSeduatmo::SVDRPHelpPages(void)
    static const char* HelpPages[] = 
    {
       "MODE <mode>\n"
-      "    Set mode {atmo|fixed|black|detach}\n",
+      "    Set mode {atmo|fixed|rainbow|black|detach}\n",
       0
    };
 
@@ -465,6 +481,7 @@ void cSeduSetup::Store()
    SetupStore("FixedColorRed", data.fixedR);
    SetupStore("FixedColorGreen", data.fixedG);
    SetupStore("FixedColorBlue", data.fixedB);
+   SetupStore("EffectSpeed", data.effectSpeed);
 
    SetupStore("SeduMode", data.seduMode);
    SetupStore("SeduRgbOrder", data.seduRGBOrder);

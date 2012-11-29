@@ -36,6 +36,7 @@ class cSeduService
       {
          vmAtmo,
          vmFixedCol,
+         vmRainbow,
          vmBlack,
          vmDetached,
          vmCount
