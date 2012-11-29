@@ -35,7 +35,7 @@ msgid "Log level"
 msgstr ""
 
 msgid "Show mainmenu"
-msgstr "Zeige Hauptmenu"
+msgstr "Zeige Hauptmenü"
 
 msgid "Frequence [Hz]"
 msgstr "Frequenz (Hz)"
