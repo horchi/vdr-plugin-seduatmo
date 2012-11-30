@@ -80,7 +80,7 @@ MsTime msNow()
 }
 
 //***************************************************************************
-// 
+// Misc. Functions
 //***************************************************************************
 
 int minMax(int x, int min, int max)
@@ -94,3 +94,18 @@ int minMax(int x, int min, int max)
    return x;
 }
 
+double min(double a, double b)
+{
+    return a < b ? a : b;
+}
+
+double max(double a, double b)
+{
+    return a >= b ? a : b;
+}
+
+int getrand(int min, int max)
+{
+    srand(time(0));
+    return rand() % (max-min) + min;
+}

@@ -331,6 +331,20 @@ cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, i
          ReplyCode = 550;
          return "rainbow effect activated";
       }
+      else if (Option && strcasecmp(Option, "wheel") == 0) 
+      {
+         cfg.viewMode = cSeduService::vmColorWheel;
+         startAtmo();
+         ReplyCode = 550;
+         return "color wheel effect activated";
+      }
+      else if (Option && strcasecmp(Option, "wheelstatic") == 0) 
+      {
+         cfg.viewMode = cSeduService::vmColorWheelStatic;
+         startAtmo();
+         ReplyCode = 550;
+         return "static color wheel activated";
+      }
       else if (Option && strcasecmp(Option, "black") == 0) 
       {
          cfg.viewMode = cSeduService::vmBlack;
@@ -362,7 +376,7 @@ const char** cPluginSeduatmo::SVDRPHelpPages(void)
    static const char* HelpPages[] = 
    {
       "MODE <mode>\n"
-      "    Set mode {atmo|fixed|rainbow|black|detach}\n",
+      "    Set mode {atmo|fixed|rainbow|wheel|wheelstatic|black|detach}\n",
       0
    };
 
