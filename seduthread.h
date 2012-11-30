@@ -14,18 +14,6 @@
 #include "common.h"
 #include "config.h"
 
-//***************************************************************************
-// Pixel - format as provided by softhddevice 
-//***************************************************************************
-
-struct Pixel
-{
-   unsigned char b;
-   unsigned char g;
-   unsigned char r;
-   unsigned char a;
-};
-
 class PixQueue
 {
    public:
@@ -200,5 +188,5 @@ class cSeduThread : public cThread, public cSeduService
       int imageHeight;
 
       Pixel getRainbowColor();
-      Pixel hsv2Rgb(int h, double s, double v);
+      Pixel getColorWheel(int moving = 0, int led = 0);
 };

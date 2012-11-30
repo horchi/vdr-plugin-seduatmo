@@ -101,10 +101,10 @@ void cSeduThread::Action()
       {
          putData();
 
-         if (cfg.viewMode != vmRainbow)
-            wait = 500;                      // less load on fixed color or black 
+         if (cfg.viewMode != vmRainbow && cfg.viewMode != vmColorWheel)
+            wait = 500;      // less load on fixed color or black 
          else
-            wait = 100;                     // for Rainbow sleep always 100ms
+            wait = 100;      // for Rainbow sleep always 100ms
       }
       
       waitCondition.TimedWait(mutex, wait);  // wait time in ms
@@ -294,12 +294,10 @@ int cSeduThread::putData()
       case vmRainbow:
       {
          pFixedCol = getRainbowColor();
-
          break;
       }
 
-      default: 
-         break;
+      default: break;
    }
    
    sedu.writeStartSeq();
@@ -323,13 +321,24 @@ int cSeduThread::putData()
          whiteAdj(p);
       }
       else
-      {
-         p = &pFixedCol;
-      }
-
+         if (cfg.viewMode == vmColorWheel)
+         {
+            pixel = getColorWheel(1, led);
+            p = &pixel;
+         }
+         else if (cfg.viewMode == vmColorWheelStatic)
+         {
+            pixel = getColorWheel(0, led);
+            p = &pixel;
+         }
+         else
+         {
+            p = &pFixedCol;
+         }
+      
       sedu.writePix(p);
    }
-
+   
    sedu.writeEndSeq();
    sedu.read();
    
@@ -480,10 +489,10 @@ Pixel cSeduThread::getRainbowColor()
    static int rainbowColorTone = 0;
    static int callCount = 0;
 
-   Pixel p = hsv2Rgb(rainbowColorTone, 1, 1);
+   Pixel p = hsv2rgb(rainbowColorTone, 1, 1);
 
    if (!(callCount++ % (cfg.effectSpeed / 100)))
-   {   
+   {
       if (++rainbowColorTone >= 360)
          rainbowColorTone = 0;
    }
@@ -494,69 +503,41 @@ Pixel cSeduThread::getRainbowColor()
    return p;
 }
 
-//***************************************************************************
-// Convert from HSV to RGB
-//***************************************************************************
-
-Pixel cSeduThread::hsv2Rgb(int h, double s, double v) 
+Pixel cSeduThread::getColorWheel(int moving, int led)
 {
-   Pixel pix = {0,0,0,0};
-   double r = 0; 
-   double g = 0; 
-   double b = 0;
+   static int degrees = 0;
+   static int callCount = 0;
+   int steps = 360 / cfg.ledCount;
+   int color = 0;
    
-   int i = floor(h/60.0);
-   double f = h/60.0 - i;
-   double pv = v * (1 - s);
-   double qv = v * (1 - s * f);
-   double tv = v * (1 - s * (1-f));
-   
-   switch (i)
+   if (moving && !(callCount++ % (cfg.effectSpeed / 100)))
    {
-      case 0:    // rojo dominante
-         r = v;
-         g = tv;
-         b = pv;
-         break;
+      // calculate spinng wheel with given effect speed
 
-      case 1:    // verde
-         r = qv;
-         g = v;
-         b = pv;
-         break;
+      if (led == 0)
+         degrees += steps;
 
-      case 2: 
-         r = pv;
-         g = v;
-         b = tv;
-         break;
-
-      case 3:    // azul
-         r = pv;
-         g = qv;
-         b = v;
-         break;
-
-      case 4:
-         r = tv;
-         g = pv;
-         b = v;
-         break;
-
-      case 5:    // rojo
-         r = v;
-         g = pv;
-         b = qv;
-         break;
+      if (degrees >= 360)
+         degrees = 0;
    }
-  
-   // set each component to a integer value between 0 and 255
-  
-   pix.r = minMax(255*r, 0, 255);
-   pix.g = minMax(255*g, 0, 255);
-   pix.b = minMax(255*b, 0, 255);
-  
-   return pix;
+
+   // calculate color degrees
+
+   color = led * steps + degrees;
+
+   if (color >= 360)
+      color -= 360;
+   
+   // convert color from HSV to RGB
+
+   Pixel p = hsv2rgb(color, 1, 1);
+   
+   // create a single Pixel
+   
+   gammaAdj(&p);
+   whiteAdj(&p);
+   
+   return p;
 }
 
 //***************************************************************************

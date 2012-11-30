@@ -10,6 +10,18 @@
 #define __SEDU_SERVICE_H
 
 //***************************************************************************
+// Pixel - format as provided by softhddevice 
+//***************************************************************************
+
+struct Pixel
+{
+   unsigned char b;
+   unsigned char g;
+   unsigned char r;
+   unsigned char a;
+};
+
+//***************************************************************************
 // Sedu Service
 //***************************************************************************
 
@@ -37,6 +49,8 @@ class cSeduService
          vmAtmo,
          vmFixedCol,
          vmRainbow,
+         vmColorWheel,
+         vmColorWheelStatic,
          vmBlack,
          vmDetached,
          vmCount
@@ -60,6 +74,9 @@ class cSeduService
       };
 
       // static
+
+      void rgb2hsv(int r, int g, int b, double* h, double* s, double* v);
+      Pixel hsv2rgb(int h, double s, double v);
 
       static const char* toName(ViewMode vm);
       static const char* viewModes[];
