@@ -43,8 +43,8 @@ void cSeduService::rgb2hsv(int r, int g, int b, double* h, double* s, double* v)
    rc = (double)r / 255.0;
    gc = (double)g / 255.0;
    bc = (double)b / 255.0;
-   maxC = _max(rc, _max(gc, bc));
-   minC = _min(rc, _min(gc, bc));
+   maxC = max(rc, max(gc, bc));
+   minC = min(rc, min(gc, bc));
    delta = maxC - minC;
    *v = maxC;
 
