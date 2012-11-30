@@ -32,8 +32,8 @@ enum Misc
 
 int minMax(int x, int min, int max);
 int getrand(int min, int max);
-float _min(float a, float b);
-float _max(float a, float b);
+double min(double a, double b);
+double max(double a, double b);
 
 //***************************************************************************
 // Time
