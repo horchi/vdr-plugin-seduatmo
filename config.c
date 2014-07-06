@@ -81,7 +81,7 @@ cSeduConfig::cLed* cSeduConfig::createLeds(cLedConfs* conf)
    
    for (cLedConf* l = conf->First(); l; l = conf->Next(l))
    {
-      tell(0, "led%d (%d) %d/%d  %d/%d", seq, l->Pos(),
+      tell(1, "led%d (%d) %d/%d  %d/%d", seq, l->Pos(),
            l->X(), l->Y(), 
            l->ToX(), l->ToY());
       
