@@ -16,7 +16,7 @@
 // 
 //***************************************************************************
 
-static const char *VERSION        = "0.0.2";
+static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = "sedu ambi light control with data from softhddevice";
 static const char *MAINMENUENTRY  = "Seduatmo";
 
@@ -148,6 +148,8 @@ eOSState cSeduPluginMenu::ProcessKey(eKeys key)
          plugin->stopAtmo();
       else if (cfg.viewMode != cSeduService::vmDetached && !plugin->isRunning())
          plugin->startAtmo();
+
+      Display();
    }
 
    if (key == kOk)
