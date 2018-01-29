@@ -8,15 +8,16 @@
 
 #include <vdr/plugin.h>
 
+#include "HISTORY.h"
+
 #include "seduthread.h"
 #include "config.h"
 #include "ledsconf.h"
 
 //***************************************************************************
-// 
+//
 //***************************************************************************
 
-static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = "sedu ambi light control with data from softhddevice";
 static const char *MAINMENUENTRY  = "Seduatmo";
 
@@ -48,10 +49,10 @@ class cSeduSetup : public cMenuSetupPage, public cSeduService
 // Plugin
 //***************************************************************************
 
-class cPluginSeduatmo : public cPlugin 
+class cPluginSeduatmo : public cPlugin
 {
    public:
-      
+
       cPluginSeduatmo(void);
       virtual ~cPluginSeduatmo();
       virtual const char* Version(void)          { return VERSION; }
@@ -100,7 +101,7 @@ class cSeduPluginMenu : public cMenuSetupPage
 
       cSeduPluginMenu(const char* title, cPluginSeduatmo* aPlugin);
       virtual ~cSeduPluginMenu() { };
-      
+
       virtual eOSState ProcessKey(eKeys key);
 
    protected:
@@ -115,11 +116,11 @@ cSeduPluginMenu::cSeduPluginMenu(const char* title, cPluginSeduatmo* aPlugin)
    SetTitle(title ? title : "");
    plugin = aPlugin;
    effectSpeed = cfg.effectSpeed;
-   
+
    Clear();
 
-   cOsdMenu::Add(new cMenuEditStraItem(tr("View Mode"), 
-                                       (int*)&cfg.viewMode, 
+   cOsdMenu::Add(new cMenuEditStraItem(tr("View Mode"),
+                                       (int*)&cfg.viewMode,
                                        (int)cSeduService::vmCount,
                                        cSeduService::viewModes));
 
@@ -141,7 +142,7 @@ cSeduPluginMenu::cSeduPluginMenu(const char* title, cPluginSeduatmo* aPlugin)
 eOSState cSeduPluginMenu::ProcessKey(eKeys key)
 {
    eOSState state = cOsdMenu::ProcessKey(key);
-   
+
    if (key == kLeft || key == kRight)
    {
       if (cfg.viewMode == cSeduService::vmDetached && plugin->isRunning())
@@ -164,7 +165,7 @@ eOSState cSeduPluginMenu::ProcessKey(eKeys key)
 }
 
 void cSeduPluginMenu::Store()
-{  
+{
    plugin->SetupStore("FixedColorRed", cfg.fixedR);
    plugin->SetupStore("FixedColorGreen", cfg.fixedG);
    plugin->SetupStore("FixedColorBlue", cfg.fixedB);
@@ -175,7 +176,7 @@ void cSeduPluginMenu::Store()
 }
 
 //***************************************************************************
-// Plugin 
+// Plugin
 //***************************************************************************
 
 cPluginSeduatmo::cPluginSeduatmo(void)
@@ -310,56 +311,56 @@ bool cPluginSeduatmo::Service(const char* Id, void* Data)
 
 cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, int &ReplyCode)
 {
-   if (!strcasecmp(Command, "MODE")) 
+   if (!strcasecmp(Command, "MODE"))
    {
-      if (Option && strcasecmp(Option, "atmo") == 0) 
+      if (Option && strcasecmp(Option, "atmo") == 0)
       {
          cfg.viewMode = cSeduService::vmAtmo;
          startAtmo();
          ReplyCode = 550;
          return "atmo mode activated";
       }
-      else if (Option && strcasecmp(Option, "fixed") == 0) 
+      else if (Option && strcasecmp(Option, "fixed") == 0)
       {
          cfg.viewMode = cSeduService::vmFixedCol;
          startAtmo();
          ReplyCode = 550;
          return "fixed color activated";
       }
-      else if (Option && strcasecmp(Option, "rainbow") == 0) 
+      else if (Option && strcasecmp(Option, "rainbow") == 0)
       {
          cfg.viewMode = cSeduService::vmRainbow;
          startAtmo();
          ReplyCode = 550;
          return "rainbow effect activated";
       }
-      else if (Option && strcasecmp(Option, "wheel") == 0) 
+      else if (Option && strcasecmp(Option, "wheel") == 0)
       {
          cfg.viewMode = cSeduService::vmColorWheel;
          startAtmo();
          ReplyCode = 550;
          return "color wheel effect activated";
       }
-      else if (Option && strcasecmp(Option, "wheelstatic") == 0) 
+      else if (Option && strcasecmp(Option, "wheelstatic") == 0)
       {
          cfg.viewMode = cSeduService::vmColorWheelStatic;
          startAtmo();
          ReplyCode = 550;
          return "static color wheel activated";
       }
-      else if (Option && strcasecmp(Option, "black") == 0) 
+      else if (Option && strcasecmp(Option, "black") == 0)
       {
          cfg.viewMode = cSeduService::vmBlack;
          startAtmo();
-         
+
          ReplyCode = 550;
          return "stripes black";
       }
-      else if (Option && strcasecmp(Option, "detach") == 0) 
+      else if (Option && strcasecmp(Option, "detach") == 0)
       {
          cfg.viewMode = cSeduService::vmDetached;
          stopAtmo();
-         
+
          ReplyCode = 550;
          return "stripes detached";
       }
@@ -373,9 +374,9 @@ cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, i
    return 0;
 }
 
-const char** cPluginSeduatmo::SVDRPHelpPages(void) 
-{ 
-   static const char* HelpPages[] = 
+const char** cPluginSeduatmo::SVDRPHelpPages(void)
+{
+   static const char* HelpPages[] =
    {
       "MODE <mode>\n"
       "    Set mode {atmo|fixed|rainbow|wheel|wheelstatic|black|detach}\n",
@@ -419,7 +420,7 @@ cSeduSetup::cSeduSetup()
 
    if (rgbOrderIndex >= 6)
       rgbOrderIndex = 0;
-   
+
    // Cinema Bars
 
    cineBars[0] = "Horizontal";
@@ -433,7 +434,7 @@ cSeduSetup::cSeduSetup()
 // Setup
 //***************************************************************************
 
-void cSeduSetup::Setup() 
+void cSeduSetup::Setup()
 {
    Clear();
 
@@ -459,7 +460,7 @@ void cSeduSetup::Setup()
    Add(new cMenuEditStraItem(tr("SEDU RGB order"), &rgbOrderIndex, 6, seduRGBOrders));
 }
 
-eOSState cSeduSetup::ProcessKey(eKeys Key) 
+eOSState cSeduSetup::ProcessKey(eKeys Key)
 {
    eOSState state = cMenuSetupPage::ProcessKey(Key);
 

@@ -58,6 +58,7 @@ void cSeduThread::Stop()
 
 void cSeduThread::Action()
 {
+   time_t last = 0;
    MsTime wait = 0;
    cMutexLock lock(&mutex);
 
@@ -70,6 +71,20 @@ void cSeduThread::Action()
 
    while (loopActive && Running())
    {
+      if (!sedu.isOpen())
+      {  
+         if (last > time(0)-30)
+         {
+            waitCondition.TimedWait(mutex, 1000);  // wait time in ms
+            continue;
+         }
+
+         last = time(0);
+
+         if (sedu.open() != success)
+            continue;
+      }
+
       MsTime start = msNow();
 
       // work ...

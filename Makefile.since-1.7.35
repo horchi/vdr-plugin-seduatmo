@@ -8,6 +8,12 @@ PLUGIN = seduatmo
 
 VERSION = $(shell grep 'static const char \*VERSION *=' $(PLUGIN).c | awk '{ print $$6 }' | sed -e 's/[";]//g')
 
+LASTHIST    = $(shell grep '^20[0-3][0-9]' $(HISTFILE) | head -1)
+LASTCOMMENT = $(subst |,\n,$(shell sed -n '/$(LASTHIST)/,/^ *$$/p' $(HISTFILE) | tr '\n' '|'))
+LASTTAG     = $(shell git describe --tags --abbrev=0)
+BRANCH      = $(shell git rev-parse --abbrev-ref HEAD)
+GIT_REV = $(shell git describe --always 2>/dev/null)
+
 ### The directory environment:
 
 # Use package data if installed...otherwise assume we're under the VDR source directory:
@@ -121,3 +127,40 @@ dist: $(I18Npo) clean
 clean:
 	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+
+cppchk:
+	cppcheck --language=c++ --template="{file}:{line}:{severity}:{message}" --quiet --force *.c *.h
+
+# ------------------------------------------------------
+# Git / Versioning / Tagging
+# ------------------------------------------------------
+
+vcheck:
+	git fetch
+	if test "$(LASTTAG)" = "$(VERSION)"; then \
+		echo "Warning: tag/version '$(VERSION)' already exists, update HISTORY first. Aborting!"; \
+		exit 1; \
+	fi
+
+push: vcheck
+	echo "tagging git with $(VERSION)"
+	git push
+	git tag $(VERSION)
+	git push --tags
+
+commit: vcheck
+	git commit -m "$(LASTCOMMENT)" -a
+
+git: commit push
+
+showv:
+	@echo "Git ($(BRANCH)):\\n  Version: $(LASTTAG) (tag)"
+	@echo "Local:"
+	@echo "  Version: $(VERSION)"
+	@echo "  Change:"
+	@echo -n "   $(LASTCOMMENT)"
+
+update:
+	git pull
+	@make clean install
+	restart vdr
