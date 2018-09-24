@@ -6,6 +6,7 @@
  * $Id: seduatmo.c,v 1.64 2012/11/28 06:29:24 wendel Exp $
  */
 
+#include <getopt.h>
 #include <vdr/plugin.h>
 
 #include "HISTORY.h"
@@ -57,7 +58,7 @@ class cPluginSeduatmo : public cPlugin
       virtual ~cPluginSeduatmo();
       virtual const char* Version(void)          { return VERSION; }
       virtual const char* Description(void)      { return DESCRIPTION; }
-      virtual const char* CommandLineHelp(void)  { return 0; }
+      virtual const char* CommandLineHelp(void);
       virtual bool ProcessArgs(int argc, char* argv[]);
       virtual bool Initialize(void);
       virtual bool Start(void);
@@ -76,6 +77,7 @@ class cPluginSeduatmo : public cPlugin
 
       int startAtmo();
       int stopAtmo();
+
       cSeduThread* update;
 
       int isRunning()
@@ -89,6 +91,7 @@ class cPluginSeduatmo : public cPlugin
    private:
 
       cLedConfs ledConfs;
+      int autodetectDevice;
 };
 
 //***************************************************************************
@@ -179,9 +182,10 @@ void cSeduPluginMenu::Store()
 // Plugin
 //***************************************************************************
 
-cPluginSeduatmo::cPluginSeduatmo(void)
+cPluginSeduatmo::cPluginSeduatmo()
 {
    update = 0;
+   autodetectDevice = no;
 }
 
 cPluginSeduatmo::~cPluginSeduatmo()
@@ -189,8 +193,38 @@ cPluginSeduatmo::~cPluginSeduatmo()
    stopAtmo();
 }
 
+//***************************************************************************
+// Process Args
+//***************************************************************************
+
+const char* cPluginSeduatmo::CommandLineHelp()
+{
+   return
+      "   -d,              --autodetect           try autodetect of tty device (need root rights)\n"
+      ;
+}
+
 bool cPluginSeduatmo::ProcessArgs(int argc, char* argv[])
 {
+   int c;
+
+   static option long_options[] =
+   {
+      { "autodetect",    no_argument, 0, 'd' },
+      { 0, 0, 0, 0 }
+   };
+
+   // check the arguments
+
+   while ((c = getopt_long(argc, argv, "d", long_options, 0)) != -1)
+   {
+      switch (c)
+      {
+         case 'd': autodetectDevice = yes;          break;
+         default:  tell(0, "Ignoring unknown argument '%c' '%s'", c, optarg);
+      }
+   }
+
    return true;
 }
 
@@ -203,7 +237,7 @@ bool cPluginSeduatmo::Initialize(void)
    if (!ledConfs.Load(tmp, true))
    {
       free(tmp);
-      return fail;
+      return false;
    }
 
    free(tmp);
@@ -228,7 +262,7 @@ int cPluginSeduatmo::startAtmo()
       delete update;
    }
 
-   update = new cSeduThread();
+   update = new cSeduThread(autodetectDevice);
 
    if (cfg.grabWidth <= 0 || cfg.grabHeight <= 0 || !cfg.ledCount)
       tell(0, "Error: Invalid configuration in seduatmo.conf, aborting");

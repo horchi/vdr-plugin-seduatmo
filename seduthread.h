@@ -23,13 +23,13 @@ class PixQueue
       void clear()          { while (!pQueue.empty()) pQueue.pop(); r=g=b=0; }
       int getCount()        { return pQueue.size(); }
 
-      void push(Pixel* p) 
-      { 
+      void push(Pixel* p)
+      {
          pQueue.push(*p);
- 
+
          r += p->r;
          g += p->g;
-         b += p->b;        
+         b += p->b;
 
          // remove old entrys from queue and sum
 
@@ -38,7 +38,7 @@ class PixQueue
             r -= pQueue.front().r;
             g -= pQueue.front().g;
             b -= pQueue.front().b;
-            
+
             pQueue.pop();
          }
       }
@@ -49,7 +49,7 @@ class PixQueue
          p->g = g / pQueue.size();
          p->b = b / pQueue.size();
       }
-      
+
    protected:
 
       std::queue <Pixel> pQueue;
@@ -83,7 +83,7 @@ class PixSum
       }
 
    protected:
-      
+
       unsigned int r;
       unsigned int g;
       unsigned int b;
@@ -101,7 +101,7 @@ class cSeduLine : public cSeduService
       cSeduLine();
       ~cSeduLine()  { close(); }
 
-      int open();
+      int open(int tryAutoDetect);
       int close();
       int isOpen()  { return fd != na; }
 
@@ -122,7 +122,7 @@ class cSeduLine : public cSeduService
    private:
 
       int detect();
-   
+
       // data
 
       int dataBytesSend;
@@ -146,7 +146,7 @@ class cSeduThread : public cThread, public cSeduService
 {
    public:
 
-      cSeduThread();
+      cSeduThread(int aAutodetectDevice);
       ~cSeduThread();
 
       int isRunning() { return Running(); }
@@ -154,7 +154,7 @@ class cSeduThread : public cThread, public cSeduService
       // interface
 
       void Stop();
-     
+
    private:
 
       void Action(void);
@@ -173,6 +173,7 @@ class cSeduThread : public cThread, public cSeduService
 
       // data
 
+      int autodetectDevice;
       cSeduLine sedu;
 
       cMutex mutex;

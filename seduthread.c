@@ -22,8 +22,10 @@
 // Object
 //***************************************************************************
 
-cSeduThread::cSeduThread()
+cSeduThread::cSeduThread(int aAutodetectDevice)
 {
+   autodetectDevice = aAutodetectDevice;
+
    loopActive = false;
    pixAverage = 0;
    image = 0;
@@ -45,7 +47,7 @@ cSeduThread::~cSeduThread()
 //***************************************************************************
 
 void cSeduThread::Stop()
-{   
+{
    loopActive = false;
    waitCondition.Broadcast();    // wakeup the thread
 
@@ -72,7 +74,7 @@ void cSeduThread::Action()
    while (loopActive && Running())
    {
       if (!sedu.isOpen())
-      {  
+      {
          if (last > time(0)-30)
          {
             waitCondition.TimedWait(mutex, 1000);  // wait time in ms
@@ -81,7 +83,7 @@ void cSeduThread::Action()
 
          last = time(0);
 
-         if (sedu.open() != success)
+         if (sedu.open(autodetectDevice) != success)
             continue;
       }
 
@@ -117,13 +119,13 @@ void cSeduThread::Action()
          putData();
 
          if (cfg.viewMode != vmRainbow && cfg.viewMode != vmColorWheel)
-            wait = 500;      // less load on fixed color or black 
+            wait = 500;      // less load on fixed color or black
          else
             wait = 100;      // for Rainbow sleep always 100ms
       }
-      
+
       waitCondition.TimedWait(mutex, wait);  // wait time in ms
-   } 
+   }
 
    sedu.close();
    loopActive = false;
@@ -149,9 +151,9 @@ int cSeduThread::grabImage()
    int softHdGrabService = (softHdPlugin && softHdPlugin->Service(ATMO1_GRAB_SERVICE, 0));
 
    if (!softHdGrabService)
-      return error("Can't find softhddevice %s, aborting grab, retrying in 10 seconds!", 
+      return error("Can't find softhddevice %s, aborting grab, retrying in 10 seconds!",
                    softHdPlugin ? "service" : "plugin");
- 
+
    // grab image at sofhddevice
 
    req.width = cfg.grabWidth;
@@ -160,7 +162,7 @@ int cSeduThread::grabImage()
 
    if (!softHdPlugin->Service(ATMO1_GRAB_SERVICE, &req) || !req.img)
       return fail;
-   
+
    tell(2, "Got image with %dx%d pixel; %d bytes", req.width, req.height, req.size);
 
    image = (Pixel*)req.img;
@@ -188,24 +190,24 @@ int cSeduThread::detectCineBars()
       for (off = 0; off < imageHeight/5; off++)  // cinebar height max 1/5 of the screen height
       {
          int above = 0;
-         
+
          for (int x = 0; x < imageWidth; x++)
          {
             p = &image[off*imageWidth + x];
-            
+
             if (p->r > threshold || p->g > threshold || p->b > threshold)
                above++;
-            
+
             p = &image[((imageHeight-1)-off)*imageWidth + x];
-            
+
             if (p->r > threshold || p->g > threshold || p->b > threshold)
                above++;
          }
-         
+
          if (above > imageWidth/8)              // max 1/8 failed pixel
             break;
       }
-      
+
       if (cineBarsHor != off)
       {
          static int last = 0;
@@ -227,30 +229,30 @@ int cSeduThread::detectCineBars()
    }
 
    // check vertical bars
-   
+
    if (cfg.detectCineBars == cbVertical || cfg.detectCineBars == cbBoth)
    {
       for (off = 0; off < imageWidth/5; off++)    // cinebar height max 1/5 of the screen width
       {
          int above = 0;
-         
+
          for (int y = 0; y < imageHeight; y++)
          {
             p = &image[y*imageWidth + off];
-            
+
             if (p->r > threshold || p->g > threshold || p->b > threshold)
                above++;
-            
+
             p = &image[y*imageWidth + ((imageWidth-1)-off)];
-            
+
             if (p->r > threshold || p->g > threshold || p->b > threshold)
             above++;
          }
-         
+
          if (above > imageHeight/6)         // max 1/6 failed pixel
             break;
       }
-      
+
       if (cineBarsVer != off)
       {
          static int last = 0;
@@ -285,7 +287,7 @@ int cSeduThread::putData()
 
    if (!sedu.isOpen())
    {
-      if (sedu.open() != success)
+      if (sedu.open(autodetectDevice) != success)
          return fail;
    }
 
@@ -314,13 +316,13 @@ int cSeduThread::putData()
 
       default: break;
    }
-   
+
    sedu.writeStartSeq();
-   
+
    // loop over all LEDs
 
    for (int led = 0; led < cfg.ledCount; led++)
-   {   
+   {
       Pixel pixel = {0,0,0,0};
       Pixel* p = &pixel;
 
@@ -350,13 +352,13 @@ int cSeduThread::putData()
          {
             p = &pFixedCol;
          }
-      
+
       sedu.writePix(p);
    }
-   
+
    sedu.writeEndSeq();
    sedu.read();
-   
+
    return success;
 }
 
@@ -385,7 +387,7 @@ int cSeduThread::getPixel(int ledIdx, Pixel* pixel)
 
    if (led->x < 0 || led->y < 0)
    {
-      tell(0, "Invalid position for (%d/%d) led %d, ignoring", 
+      tell(0, "Invalid position for (%d/%d) led %d, ignoring",
            led->x, led->y, ledIdx);
       return 0;
    }
@@ -426,7 +428,7 @@ int cSeduThread::getPixel(int ledIdx, Pixel* pixel)
          break;
       }
    }
-   
+
    if (!sum.getCount())
       return error("Fatal missing range for led %d", ledIdx);
 
@@ -475,7 +477,7 @@ void cSeduThread::whiteAdj(Pixel* p)
    {
       p->r = (double)p->r * (0.01 * cfg.adjRed);
       p->b = (double)p->b * (0.01 * cfg.adjBlue);
-      p->g = (double)p->g * (0.01 * cfg.adjGreen);   
+      p->g = (double)p->g * (0.01 * cfg.adjGreen);
    }
 }
 
@@ -485,11 +487,11 @@ void cSeduThread::whiteAdj(Pixel* p)
 
 void cSeduThread::gammaAdj(Pixel* p)
 {
-   if (p && !isBlack(p) && cfg.gamma > 10)  
+   if (p && !isBlack(p) && cfg.gamma > 10)
    {
       double g = cfg.gamma / 10.0;
 
-      p->r = (unsigned char)(pow(p->r / 255.0, g) * 255.0);  
+      p->r = (unsigned char)(pow(p->r / 255.0, g) * 255.0);
       p->g = (unsigned char)(pow(p->g / 255.0, g) * 255.0);
       p->b = (unsigned char)(pow(p->b / 255.0, g) * 255.0);
    }
@@ -524,7 +526,7 @@ Pixel cSeduThread::getColorWheel(int moving, int led)
    static int callCount = 0;
    int steps = 360 / cfg.ledCount;
    int color = 0;
-   
+
    if (moving && !(callCount++ % (cfg.effectSpeed / 100)))
    {
       // calculate spinng wheel with given effect speed
@@ -542,16 +544,16 @@ Pixel cSeduThread::getColorWheel(int moving, int led)
 
    if (color >= 360)
       color -= 360;
-   
+
    // convert color from HSV to RGB
 
    Pixel p = hsv2rgb(color, 1, 1);
-   
+
    // create a single Pixel
-   
+
    gammaAdj(&p);
    whiteAdj(&p);
-   
+
    return p;
 }
 
@@ -565,8 +567,8 @@ Pixel cSeduThread::getColorWheel(int moving, int led)
 cSeduLine::cSeduLine()
 {
    dataBytesSend = 0;
-   fd = na;  
-   bzero(&oldtio, sizeof(oldtio)); 
+   fd = na;
+   bzero(&oldtio, sizeof(oldtio));
    deviceName = 0;
 
    setMode(smMiniDMX);
@@ -587,9 +589,9 @@ void cSeduLine::setMode(SeduMode aMode, int channels)
          byteStart = 0x5A;
          byteMode = 0xA2;
          byteEnd = 0xA5;
-         
+
          dataBytes = 512;
-         
+
          break;
       }
       case smTpm2:
@@ -597,9 +599,9 @@ void cSeduLine::setMode(SeduMode aMode, int channels)
          byteStart = 0xC9;
          byteMode = 0xDA;
          byteEnd = 0x36;
-         
+
          dataBytes = channels*3;
-         
+
          break;
       }
    }
@@ -616,7 +618,7 @@ int cSeduLine::detect()
    FILE* fd;
    regex_t reg;
    char line[200];
-   
+
    free(deviceName);
    deviceName = 0;
 
@@ -626,19 +628,19 @@ int cSeduLine::detect()
       regfree(&reg);
       return fail;
    }
-   
+
    if (!(fd = fopen("/proc/tty/driver/usbserial", "r")))
    {
       tell(0, "Could not open '/proc/tty/driver/usbserial' '%m'");
-      
+
       regfree(&reg);
       return fail;
    }
-   
-   while (fgets(line, sizeof(line), fd)) 
+
+   while (fgets(line, sizeof(line), fd))
    {
       char* p;
-      
+
       if (!regexec(&reg, line, 0, 0, 0) && (p = index(line, ':')))
       {
          *p = 0;
@@ -646,16 +648,16 @@ int cSeduLine::detect()
          break;
       }
    }
-   
+
    fclose(fd);
    regfree(&reg);
-   
-   if (!deviceName) 
+
+   if (!deviceName)
    {
-      tell(0, "Could not auto detect a usb device like '%s' in '/proc/tty/driver/usbserial'");
+      tell(0, "Could not auto detect a usb device like '%s' in '/proc/tty/driver/usbserial'", pattern);
       return fail;
    }
-   
+
    return success;
 }
 
@@ -663,18 +665,20 @@ int cSeduLine::detect()
 // Open/Close
 //***************************************************************************
 
-int cSeduLine::open()
+int cSeduLine::open(int tryAutoDetect)
 {
    struct termios newtio;
 
-   if (detect() != success)
+   if (!tryAutoDetect || detect() != success)
    {
       free(deviceName);
       deviceName = strdup("/dev/ttySEDU");
-      tell(0, "Falling back to '%s'", deviceName);
+
+      if (tryAutoDetect)
+         tell(0, "Falling back to '%s'", deviceName);
    }
 
-   if (isOpen()) 
+   if (isOpen())
       close();
 
 	// open serial line with 8 data bits, no parity, 1 stop bit
@@ -683,12 +687,12 @@ int cSeduLine::open()
    {
       fd = na;
       tell(0, "Error: Opening '%s' failed", deviceName);
-  
+
       return fail;
    }
 
    tell(0, "Opening '%s' succeeded!", deviceName);
-   
+
    // configure serial line
 
    tcgetattr(fd, &oldtio);
@@ -700,7 +704,7 @@ int cSeduLine::open()
       CS8     : 8n1 (8bit,no parity,1 stopbit)
       CLOCAL  : local connection, no modem control
       CREAD   : enable receiving characters  */
-   
+
    newtio.c_cflag = B500000 | CS8 | CLOCAL | CREAD;
    newtio.c_iflag = IGNPAR;
    newtio.c_oflag = 0;
@@ -739,15 +743,15 @@ int cSeduLine::read()
    timeval tv;
    unsigned char c;
    MsTime start = msNow();
-   
+
    if (!isOpen())
       return fail;
 
    // check if something to read ...
-   
+
    tv.tv_sec = 0;
    tv.tv_usec = 100000;
-   
+
    FD_ZERO(&readfs);
    FD_SET(fd, &readfs);
    select(fd+1, &readfs, 0, 0, &tv);
@@ -774,7 +778,7 @@ int cSeduLine::write(unsigned char b)
 
    if (checkLine() != success)
       return 0;
-   
+
    tell(3, "send: 0x%02X", b);
 
    return ::write(fd, &b, 1);
@@ -845,10 +849,10 @@ int cSeduLine::checkLine()
       return fail;
 
    // check if space to write ...
-   
+
    FD_ZERO(&port);
    FD_SET(fd, &port);
-   
+
    if (select(fd+1, 0, &port, 0, 0) == -1)
    {
       tell(0, "Error: select() %m");
