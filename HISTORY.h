@@ -7,8 +7,8 @@
  *
  */
 
-#define _VERSION      "0.0.5"
-#define VERSION_DATE  "24.09.2018"
+#define _VERSION      "0.0.6"
+#define VERSION_DATE  "04.10.2018"
 
 #ifdef GIT_REV
 #  define VERSION _VERSION "-GIT" GIT_REV
@@ -18,6 +18,9 @@
 
 /*
  * ------------------------------------
+
+2018-10-04: Version 0.0.6
+     Added support of softhdcuvid plugin
 
 2018-09-24: Version 0.0.5
      Auto device detection configurable

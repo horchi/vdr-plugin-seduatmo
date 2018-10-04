@@ -66,6 +66,10 @@ void cSeduThread::Action()
 
    tell(0, "atmo Thread started (pid=%d)", getpid());
 
+   // wait for softhddevice started (assume no retry action below needed)
+
+   sleep(5);
+
    loopActive = true;
    pixAverage = new PixQueue[cfg.ledCount];
 
@@ -75,8 +79,9 @@ void cSeduThread::Action()
    {
       if (!sedu.isOpen())
       {
-         if (last > time(0)-30)
+         if (last > time(0)-10)
          {
+            // we are here on sedu interface trouble and on grab-plugin interface trouble!
             waitCondition.TimedWait(mutex, 1000);  // wait time in ms
             continue;
          }
@@ -142,17 +147,26 @@ void cSeduThread::Action()
 
 int cSeduThread::grabImage()
 {
+   static cPlugin* softHdPlugin = 0;
+
+   if (!softHdPlugin)
+   {
+      softHdPlugin = cPluginManager::GetPlugin("softhddevice");
+
+      if (!softHdPlugin)
+         softHdPlugin = cPluginManager::GetPlugin("softhdcuvid");
+
+      int softHdGrabService = (softHdPlugin && softHdPlugin->Service(ATMO1_GRAB_SERVICE, 0));
+
+      if (!softHdGrabService)
+         return error("Can't find grab service neither at softhddevice nor at softhdcuvid "
+                      "- aborting grab, retrying in 10 seconds!");
+   }
+
    SoftHDDevice_AtmoGrabService_v1_1_t req;
 
    free(image);
    image = 0;
-
-   cPlugin* softHdPlugin = cPluginManager::GetPlugin("softhddevice");
-   int softHdGrabService = (softHdPlugin && softHdPlugin->Service(ATMO1_GRAB_SERVICE, 0));
-
-   if (!softHdGrabService)
-      return error("Can't find softhddevice %s, aborting grab, retrying in 10 seconds!",
-                   softHdPlugin ? "service" : "plugin");
 
    // grab image at sofhddevice
 
