@@ -74,6 +74,7 @@ class cPluginSeduatmo : public cPlugin
       virtual bool Service(const char* Id, void* Data = NULL);
       virtual const char** SVDRPHelpPages(void);
       virtual cString SVDRPCommand(const char* Command, const char* Option, int &ReplyCode);
+      cString changeMode(const char* Option, int &ReplyCode);
 
       int startAtmo();
       int stopAtmo();
@@ -340,69 +341,81 @@ bool cPluginSeduatmo::SetupParse(const char* Name, const char* Value)
 
 bool cPluginSeduatmo::Service(const char* Id, void* Data)
 {
+   if (strcmp(Id, "SeduAtmo-ModeService-v1.0") == 0)
+   {
+      int ReplyCode = 0;
+      changeMode((const char*)Data, ReplyCode);
+      return true;
+   }
+
    return false;
 }
 
 cString cPluginSeduatmo::SVDRPCommand(const char* Command, const char* Option, int &ReplyCode)
 {
    if (!strcasecmp(Command, "MODE"))
+      return changeMode(Option, ReplyCode);
+
+   return 0;
+}
+
+cString cPluginSeduatmo::changeMode(const char* Option, int &ReplyCode)
+{
+   if (Option && strcasecmp(Option, "atmo") == 0)
    {
-      if (Option && strcasecmp(Option, "atmo") == 0)
-      {
-         cfg.viewMode = cSeduService::vmAtmo;
-         startAtmo();
-         ReplyCode = 550;
-         return "atmo mode activated";
-      }
-      else if (Option && strcasecmp(Option, "fixed") == 0)
-      {
-         cfg.viewMode = cSeduService::vmFixedCol;
-         startAtmo();
-         ReplyCode = 550;
-         return "fixed color activated";
-      }
-      else if (Option && strcasecmp(Option, "rainbow") == 0)
-      {
-         cfg.viewMode = cSeduService::vmRainbow;
-         startAtmo();
-         ReplyCode = 550;
-         return "rainbow effect activated";
-      }
-      else if (Option && strcasecmp(Option, "wheel") == 0)
-      {
-         cfg.viewMode = cSeduService::vmColorWheel;
-         startAtmo();
-         ReplyCode = 550;
-         return "color wheel effect activated";
-      }
-      else if (Option && strcasecmp(Option, "wheelstatic") == 0)
-      {
-         cfg.viewMode = cSeduService::vmColorWheelStatic;
-         startAtmo();
-         ReplyCode = 550;
-         return "static color wheel activated";
-      }
-      else if (Option && strcasecmp(Option, "black") == 0)
-      {
-         cfg.viewMode = cSeduService::vmBlack;
-         startAtmo();
+      cfg.viewMode = cSeduService::vmAtmo;
+      startAtmo();
+      ReplyCode = 550;
+      return "atmo mode activated";
+   }
+   else if (Option && strcasecmp(Option, "fixed") == 0)
+   {
+      cfg.viewMode = cSeduService::vmFixedCol;
+      startAtmo();
+      ReplyCode = 550;
+      return "fixed color activated";
+   }
+   else if (Option && strcasecmp(Option, "rainbow") == 0)
+   {
+      cfg.viewMode = cSeduService::vmRainbow;
+      startAtmo();
+      ReplyCode = 550;
+      return "rainbow effect activated";
+   }
+   else if (Option && strcasecmp(Option, "wheel") == 0)
+   {
+      cfg.viewMode = cSeduService::vmColorWheel;
+      startAtmo();
+      ReplyCode = 550;
+      return "color wheel effect activated";
+   }
+   else if (Option && strcasecmp(Option, "wheelstatic") == 0)
+   {
+      cfg.viewMode = cSeduService::vmColorWheelStatic;
+      startAtmo();
+      ReplyCode = 550;
+      return "static color wheel activated";
+   }
+   else if (Option && strcasecmp(Option, "black") == 0)
+   {
+      cfg.viewMode = cSeduService::vmBlack;
+      startAtmo();
 
-         ReplyCode = 550;
-         return "stripes black";
-      }
-      else if (Option && strcasecmp(Option, "detach") == 0)
-      {
-         cfg.viewMode = cSeduService::vmDetached;
-         stopAtmo();
+      ReplyCode = 550;
+      return "stripes black";
+   }
+   else if (Option && strcasecmp(Option, "detach") == 0)
+   {
+      cfg.viewMode = cSeduService::vmDetached;
+      stopAtmo();
 
-         ReplyCode = 550;
-         return "stripes detached";
-      }
-      else
-      {
-         ReplyCode = 901;
-         return "Error: Unexpected option";
-      }
+      ReplyCode = 550;
+      return "stripes detached";
+   }
+   else
+   {
+      ReplyCode = 901;
+      return "Error: Unexpected option";
    }
 
    return 0;
