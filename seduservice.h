@@ -10,7 +10,7 @@
 #define __SEDU_SERVICE_H
 
 //***************************************************************************
-// Pixel - format as provided by softhddevice 
+// Pixel - format as provided by softhddevice
 //***************************************************************************
 
 struct Pixel
@@ -71,6 +71,7 @@ class cSeduService
          int y;
          int toY;
          LedPosition lp;
+         char rgbOrder[4] {'\0'};
       };
 
       // static

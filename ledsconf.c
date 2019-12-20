@@ -13,22 +13,6 @@
 #include "ledsconf.h"
 
 //***************************************************************************
-// cLedConf
-//***************************************************************************
-//***************************************************************************
-// Object
-//***************************************************************************
-
-cLedConf::cLedConf() 
-{ 
-   x = na;
-   toX = na;
-   y = na;
-   toY = na;
-   lp = na;
-}
-
-//***************************************************************************
 // Parse like like "led 0-1 14-17"
 //***************************************************************************
 
@@ -60,9 +44,9 @@ bool cLedConf::Parse(const char* s)
       lp = lpRight;
    else
       return error("Missing location {top,left,bot(tom),right}");
-   
+
    // skip to delemiter
-   
+
    while (*p && *p != ' ' && *p != '\t')
       p++;
 
@@ -73,16 +57,19 @@ bool cLedConf::Parse(const char* s)
 
    skipWs(p);
 
-   // parse X 
+   // parse X
 
    if (!parseRange(p, x, toX))
       return false;
 
    // parse Y
-   
+
    if (!parseRange(p, y, toY))
       return false;
-   
+
+   if (!parseOrder(p, rgbOrder))
+      return false;
+
    return true;
 }
 
@@ -110,6 +97,25 @@ bool cLedConf::parseRange(const char*& p, int& from, int& to)
       return false;
 
    to = strtol(p, (char**)&p, 0);
+
+   return true;
+}
+
+//***************************************************************************
+// Parse RGB Order Range "GBR"
+//***************************************************************************
+
+bool cLedConf::parseOrder(const char*& p, char* order)
+{
+   p = skipWs(p);
+
+   if (!(*p))
+      return true;
+
+   if (!strstr("RGB:RBG:GBR:GRB:BGR:BRG", p))
+      return false;
+
+   sprintf(order, "%.3s", p);
 
    return true;
 }

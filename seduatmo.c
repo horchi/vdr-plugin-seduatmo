@@ -16,11 +16,9 @@
 #include "ledsconf.h"
 
 //***************************************************************************
-//
-//***************************************************************************
 
-static const char *DESCRIPTION    = "sedu ambi light control with data from softhddevice";
-static const char *MAINMENUENTRY  = "Seduatmo";
+static const char *DESCRIPTION   = "sedu ambi light control with data from softhddevice";
+static const char *MAINMENUENTRY = "Seduatmo";
 
 //***************************************************************************
 // Setup

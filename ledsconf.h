@@ -21,9 +21,9 @@
 class cLedConf : public cListObject, public cSeduService
 {
    public:
-      
-      cLedConf();
-      
+
+      cLedConf() {};
+
       bool Parse(const char* s);
 
       int X()       { return x; }
@@ -31,25 +31,29 @@ class cLedConf : public cListObject, public cSeduService
       int Y()       { return y; }
       int ToY()     { return toY; }
       int Pos()     { return lp; }
+      const char* RgbOrder() { return rgbOrder; }
+
       int isValid() { return x > na && y > na && lp > na; }
 
    private:
 
-      bool parseRange(const char*& s, int& from, int& to);
+      bool parseRange(const char*& p, int& from, int& to);
+      bool parseOrder(const char*& p, char* order);
       const char* skipWs(const char* p);
 
-      int x;
-      int toX;
-      int y;
-      int toY;
-      int lp;
+      int x {na};
+      int toX {na};
+      int y {na};
+      int toY {na};
+      int lp {na};                // LED postition
+      char rgbOrder[4] {'\0'};
 };
 
 //***************************************************************************
 // cLedConfs
 //***************************************************************************
 
-class cLedConfs : public cConfig<cLedConf> 
+class cLedConfs : public cConfig<cLedConf>
 {
 
 };

@@ -7,7 +7,7 @@
  *
  */
 
-#define _VERSION      "0.0.8"
+#define _VERSION      "0.0.9"
 #define VERSION_DATE  "20.12.2019"
 
 #ifdef GIT_REV
@@ -18,6 +18,9 @@
 
 /*
  * ------------------------------------
+
+2019-12-20: Version 0.0.9
+     Added config RGB order for each LED
 
 2019-12-20: Version 0.0.8
      Added support of softhdvaapi and softhddrm plugin

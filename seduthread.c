@@ -373,7 +373,7 @@ int cSeduThread::putData()
             p = &pFixedCol;
          }
 
-      sedu.writePix(p);
+      sedu.writePix(p, cfg.leds[led].rgbOrder);
    }
 
    sedu.writeEndSeq();
@@ -836,18 +836,20 @@ int cSeduLine::writeEndSeq()
 // Write Pixel
 //***************************************************************************
 
-int cSeduLine::writePix(Pixel* p)
+int cSeduLine::writePix(Pixel* p, char* rgbOrder)
 {
-   writeColor(p, 0);
-   writeColor(p, 1);
-   writeColor(p, 2);
+   writeColor(p, 0, rgbOrder);
+   writeColor(p, 1, rgbOrder);
+   writeColor(p, 2, rgbOrder);
 
    return success;
 }
 
-int cSeduLine::writeColor(Pixel* p, int index)
+int cSeduLine::writeColor(Pixel* p, int index, char* rgbOrder)
 {
-   switch (cfg.seduRGBOrder[index])
+   const char* order = *rgbOrder != 0 ? rgbOrder : cfg.seduRGBOrder;
+
+   switch (order[index])
    {
       case 'R': dataBytesSend += write(p ? p->r : 0); break;
       case 'B': dataBytesSend += write(p ? p->b : 0); break;

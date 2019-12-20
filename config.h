@@ -29,7 +29,7 @@ class cSeduConfig : public cSeduService
       int grabWidth;
       int grabHeight;
 
-      // adjust 
+      // adjust
 
       int threshold;
       int adjGreen;
@@ -63,12 +63,12 @@ class cSeduConfig : public cSeduService
       // functions
 
       cLed* createLeds(cLedConfs* conf);
-      void copyLeds(cSeduConfig* c) 
+      void copyLeds(cSeduConfig* c)
       {
          ledCount = c->ledCount;
          leds = new cLed[ledCount];
          memset(leds, 0, ledCount*sizeof(cLed));
-         
+
          for (int i = 0; i < ledCount; i++)
             leds[i] = c->leds[i];
       }
