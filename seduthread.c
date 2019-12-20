@@ -156,6 +156,12 @@ int cSeduThread::grabImage()
       if (!softHdPlugin)
          softHdPlugin = cPluginManager::GetPlugin("softhdcuvid");
 
+      if (!softHdPlugin)
+         softHdPlugin = cPluginManager::GetPlugin("softhdvaapi");
+
+      if (!softHdPlugin)
+         softHdPlugin = cPluginManager::GetPlugin("softhddrm");
+
       int softHdGrabService = (softHdPlugin && softHdPlugin->Service(ATMO1_GRAB_SERVICE, 0));
 
       if (!softHdGrabService)

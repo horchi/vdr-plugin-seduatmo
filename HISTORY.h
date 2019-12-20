@@ -7,8 +7,8 @@
  *
  */
 
-#define _VERSION      "0.0.7"
-#define VERSION_DATE  "14.10.2018"
+#define _VERSION      "0.0.8"
+#define VERSION_DATE  "20.12.2019"
 
 #ifdef GIT_REV
 #  define VERSION _VERSION "-GIT" GIT_REV
@@ -18,6 +18,9 @@
 
 /*
  * ------------------------------------
+
+2019-12-20: Version 0.0.8
+     Added support of softhdvaapi and softhddrm plugin
 
 2018-10-14: Version 0.0.7
   - added: Plugin service interface to change mode
