@@ -14,6 +14,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <syslog.h>
+#include <string>
 
 #include <vdr/thread.h>
 
