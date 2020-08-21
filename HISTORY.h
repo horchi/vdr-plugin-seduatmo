@@ -7,8 +7,8 @@
  *
  */
 
-#define _VERSION      "0.0.9"
-#define VERSION_DATE  "20.12.2019"
+#define _VERSION      "0.0.10"
+#define VERSION_DATE  "21.08.2020"
 
 #ifdef GIT_REV
 #  define VERSION _VERSION "-GIT" GIT_REV
@@ -18,6 +18,9 @@
 
 /*
  * ------------------------------------
+
+2020-08-21: Version 0.0.10
+  - added: Auto powerof by TV state (option -t <ip|dns>)
 
 2019-12-20: Version 0.0.9
      Added config RGB order for each LED

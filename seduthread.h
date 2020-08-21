@@ -161,7 +161,7 @@ class cSeduThread : public cThread, public cSeduService
 
       int grabImage();
       int detectCineBars();
-      int putData();
+      int putData(ViewMode mode);
 
       void threshold(Pixel* p);
       void whiteAdj(Pixel* p);

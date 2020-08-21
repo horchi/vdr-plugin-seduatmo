@@ -200,6 +200,7 @@ const char* cPluginSeduatmo::CommandLineHelp()
 {
    return
       "   -d,              --autodetect           try autodetect of tty device (need root rights)\n"
+      "   -t <ip|name>,    --tv <ip|name>         auto poweroff by TV state\n"
       ;
 }
 
@@ -209,17 +210,19 @@ bool cPluginSeduatmo::ProcessArgs(int argc, char* argv[])
 
    static option long_options[] =
    {
-      { "autodetect",    no_argument, 0, 'd' },
+      { "autodetect",          no_argument, 0, 'd' },
+      { "tv",            required_argument, 0, 't' },
       { 0, 0, 0, 0 }
    };
 
    // check the arguments
 
-   while ((c = getopt_long(argc, argv, "d", long_options, 0)) != -1)
+   while ((c = getopt_long(argc, argv, "dt:", long_options, 0)) != -1)
    {
       switch (c)
       {
-         case 'd': autodetectDevice = yes;          break;
+         case 'd': autodetectDevice = yes;  break;
+         case 't': cfg.setTvIp(optarg);     break;
          default:  tell(0, "Ignoring unknown argument '%c' '%s'", c, optarg);
       }
    }

@@ -53,11 +53,11 @@ void cSeduService::rgb2hsv(int r, int g, int b, double* h, double* s, double* v)
    else
       *s = 0;
 
-   if (*s == 0) 
+   if (*s == 0)
    {
-      *h = 0; 
+      *h = 0;
    }
-   else 
+   else
    {
       if (rc == maxC)
          *h = (gc - bc) / delta;
@@ -65,7 +65,7 @@ void cSeduService::rgb2hsv(int r, int g, int b, double* h, double* s, double* v)
          *h = 2 + (bc - rc) / delta;
       else if (bc == maxC)
          *h = 4 + (rc - gc) / delta;
-      
+
       *h *= 60.0;
 
       if (*h < 0)
@@ -74,23 +74,23 @@ void cSeduService::rgb2hsv(int r, int g, int b, double* h, double* s, double* v)
 }
 
 //***************************************************************************
-// 
+//
 //***************************************************************************
 
 Pixel cSeduService::hsv2rgb(int h, double s, double v)
 {
    Pixel p;
 
-   double rr = 0; 
-   double gg = 0; 
+   double rr = 0;
+   double gg = 0;
    double bb = 0;
-   
+
    int i = floor(h/60.0);
    double f = h/60.0 - i;
    double pv = v * (1 - s);
    double qv = v * (1 - s * f);
    double tv = v * (1 - s * (1-f));
-   
+
    switch (i)
    {
       case 0:    // rojo dominante
@@ -105,7 +105,7 @@ Pixel cSeduService::hsv2rgb(int h, double s, double v)
          bb = pv;
          break;
 
-      case 2: 
+      case 2:
          rr = pv;
          gg = v;
          bb = tv;
@@ -135,6 +135,6 @@ Pixel cSeduService::hsv2rgb(int h, double s, double v)
    p.r = minMax(255*rr, 0, 255);
    p.g = minMax(255*gg, 0, 255);
    p.b = minMax(255*bb, 0, 255);
-   
+
    return p;
 }

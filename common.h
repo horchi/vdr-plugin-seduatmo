@@ -9,7 +9,7 @@
 #define __COMMON_H
 
 //***************************************************************************
-// 
+//
 //***************************************************************************
 
 enum Misc
@@ -23,17 +23,25 @@ enum Misc
    on      = 1,
    off     = 0,
    no      = 0,
-   TB      = 1
+   TB      = 1,
+
+   tmeSecondsPerMinute = 60,
+   tmeSecondsPerHour = tmeSecondsPerMinute * 60,
+   tmeSecondsPerDay = 24 * tmeSecondsPerHour,
+   tmeUsecondsPerSecond = 1000 * 1000
 };
 
 //***************************************************************************
 // Misc ..
 //***************************************************************************
 
+int isEmpty(const char* str);
 int minMax(int x, int min, int max);
 int getrand(int min, int max);
 double min(double a, double b);
 double max(double a, double b);
+int isAlive(const char* address);
+int ping(const char* address);
 
 //***************************************************************************
 // Time
@@ -47,7 +55,7 @@ MsTime msNow();
 // Tell
 //***************************************************************************
 
-void tell(int eloquence, const char* format, ...);
+void __attribute__ ((format(printf, 2, 3))) tell(int eloquence, const char* format, ...);
 int error(const char* format, ...);
 
 //***************************************************************************

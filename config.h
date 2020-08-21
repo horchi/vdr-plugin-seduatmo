@@ -24,6 +24,8 @@ class cSeduConfig : public cSeduService
       cSeduConfig();
       ~cSeduConfig();
 
+      void setTvIp(const char* p)           { free(tvIp); tvIp = strdup(p); }
+
       // geometry
 
       int grabWidth;
@@ -55,6 +57,7 @@ class cSeduConfig : public cSeduService
       SeduMode seduMode;
       Cinebars detectCineBars;
 
+      char* tvIp {nullptr};
       int loglevel;
 
       cLed* leds;

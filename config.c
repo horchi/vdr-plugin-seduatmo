@@ -49,7 +49,6 @@ cSeduConfig::cSeduConfig()
    fixedG = 101;
    fixedB = 0;
 
-
    // calculated
 
    leds = 0;
@@ -60,7 +59,8 @@ cSeduConfig::cSeduConfig()
 
 cSeduConfig::~cSeduConfig()
 {
-   if (leds) delete leds;
+   free(tvIp);
+   delete leds;
 }
 
 //***************************************************************************
@@ -103,7 +103,9 @@ cSeduConfig::cLed* cSeduConfig::createLeds(cLedConfs* conf)
          leds[seq].y   = l->Y();
          leds[seq].toX = l->ToX();
          leds[seq].toY = l->ToY();
+
          strcpy(leds[seq].rgbOrder, l->RgbOrder());
+
          seq++;
       }
    }

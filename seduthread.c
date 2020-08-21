@@ -22,6 +22,8 @@
 // Object
 //***************************************************************************
 
+// const char* tvIp = "wztv";
+
 cSeduThread::cSeduThread(int aAutodetectDevice)
 {
    autodetectDevice = aAutodetectDevice;
@@ -60,9 +62,12 @@ void cSeduThread::Stop()
 
 void cSeduThread::Action()
 {
+   const int tvTimeout = 30;
    time_t last = 0;
    MsTime wait = 0;
    cMutexLock lock(&mutex);
+   time_t lastTvAlive = time(0) - tvTimeout;
+   time_t lastTvAliveCheck{0};
 
    tell(0, "atmo Thread started (pid=%d)", getpid());
 
@@ -93,19 +98,43 @@ void cSeduThread::Action()
       }
 
       MsTime start = msNow();
+      waitCondition.TimedWait(mutex, wait);  // wait time in ms
 
       // work ...
 
       if (cfg.viewMode == vmAtmo)
       {
+         if (!isEmpty(cfg.tvIp))
+         {
+            if (lastTvAliveCheck < time(0) - tvTimeout/2)
+            {
+               lastTvAliveCheck = time(0);
+
+               if (isAlive(cfg.tvIp))
+               {
+                  tell(2, "tv IS alive");
+                  lastTvAlive = time(0);
+               }
+               else
+                  tell(2, "tv is not alive since %ld seconds", time(0) - lastTvAlive);
+            }
+
+            if (lastTvAlive < time(0) - tvTimeout)
+            {
+               putData(vmBlack);
+               wait = 500;
+               continue;
+            }
+         }
+
          if (grabImage() == success)
          {
             detectCineBars();
-            putData();
+            putData(cfg.viewMode);
 
             MsTime elapsed = msNow() - start;
             wait = 1000 / cfg.frequence - elapsed;
-            tell(2, "sleeping %ldms (%d Hz)", wait, cfg.frequence);
+            tell(2, "sleeping %lldms (%d Hz)", wait, cfg.frequence);
          }
          else
          {
@@ -121,15 +150,13 @@ void cSeduThread::Action()
       }
       else
       {
-         putData();
+         putData(cfg.viewMode);
 
          if (cfg.viewMode != vmRainbow && cfg.viewMode != vmColorWheel)
             wait = 500;      // less load on fixed color or black
          else
             wait = 100;      // for Rainbow sleep always 100ms
       }
-
-      waitCondition.TimedWait(mutex, wait);  // wait time in ms
    }
 
    sedu.close();
@@ -301,7 +328,7 @@ int cSeduThread::detectCineBars()
 // Put Data
 //***************************************************************************
 
-int cSeduThread::putData()
+int cSeduThread::putData(ViewMode mode)
 {
    Pixel pFixedCol = {0,0,0,0};
 
@@ -311,16 +338,16 @@ int cSeduThread::putData()
          return fail;
    }
 
-   switch (cfg.viewMode)
+   switch (mode)
    {
       case vmBlack:
       case vmFixedCol:
       {
-         pFixedCol.r = cfg.viewMode == vmFixedCol ? cfg.fixedR : 0;
-         pFixedCol.g = cfg.viewMode == vmFixedCol ? cfg.fixedG : 0;
-         pFixedCol.b = cfg.viewMode == vmFixedCol ? cfg.fixedB : 0;
+         pFixedCol.r = mode == vmFixedCol ? cfg.fixedR : 0;
+         pFixedCol.g = mode == vmFixedCol ? cfg.fixedG : 0;
+         pFixedCol.b = mode == vmFixedCol ? cfg.fixedB : 0;
 
-         if (cfg.viewMode != vmBlack)
+         if (mode != vmBlack)
          {
             gammaAdj(&pFixedCol);
             whiteAdj(&pFixedCol);
@@ -346,7 +373,7 @@ int cSeduThread::putData()
       Pixel pixel = {0,0,0,0};
       Pixel* p = &pixel;
 
-      if (cfg.viewMode == vmAtmo)
+      if (mode == vmAtmo)
       {
          getPixel(led, p);
          pixAverage[led].push(p);
@@ -358,12 +385,12 @@ int cSeduThread::putData()
          whiteAdj(p);
       }
       else
-         if (cfg.viewMode == vmColorWheel)
+         if (mode == vmColorWheel)
          {
             pixel = getColorWheel(1, led);
             p = &pixel;
          }
-         else if (cfg.viewMode == vmColorWheelStatic)
+         else if (mode == vmColorWheelStatic)
          {
             pixel = getColorWheel(0, led);
             p = &pixel;
@@ -778,7 +805,7 @@ int cSeduLine::read()
 
    if (FD_ISSET(fd, &readfs))
    {
-      tell(2, "Received (after %ldms): ", (msNow()-start));
+      tell(2, "Received (after %lldms): ", (msNow()-start));
 
       while (::read(fd, &c, 1) > 0)
          tell(2, "%02X ", c);
