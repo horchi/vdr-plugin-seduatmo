@@ -20,7 +20,7 @@
  * ------------------------------------
 
 2020-08-21: Version 0.0.10
-  - added: Auto powerof by TV state (option -t <ip|dns>)
+  - added: Auto poweroff by TV state (option -t <ip|dns>)
 
 2019-12-20: Version 0.0.9
      Added config RGB order for each LED
