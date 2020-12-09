@@ -62,7 +62,7 @@ void cSeduThread::Stop()
 
 void cSeduThread::Action()
 {
-   const int tvTimeout = 30;
+   const int tvTimeout = 60;
    time_t last = 0;
    MsTime wait = 0;
    cMutexLock lock(&mutex);
