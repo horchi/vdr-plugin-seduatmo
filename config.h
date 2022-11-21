@@ -28,40 +28,40 @@ class cSeduConfig : public cSeduService
 
       // geometry
 
-      int grabWidth;
-      int grabHeight;
+      int grabWidth {na};
+      int grabHeight {na};
 
       // adjust
 
-      int threshold;
-      int adjGreen;
-      int adjRed;
-      int adjBlue;
-      int frequence;
-      unsigned int average;
-      int gamma;
-      int xDeep;
-      int yDeep;
-      int black;
+      int threshold {17};
+      int adjGreen {100};
+      int adjRed {57};
+      int adjBlue {70};
+      int frequence {25};
+      unsigned int average {10};
+      int gamma {14};
+      int xDeep {2};
+      int yDeep {1};
+      int black {0};
 
       // technical
 
-      ViewMode viewMode;
-      int fixedR;
-      int fixedG;
-      int fixedB;
-      int effectSpeed;
+      ViewMode viewMode {vmAtmo};
+      int fixedR {111};
+      int fixedG {101};
+      int fixedB {0};
+      int effectSpeed {500};
 
-      int showMainmenu;
-      char seduRGBOrder[4];
-      SeduMode seduMode;
-      Cinebars detectCineBars;
+      int showMainmenu {yes};
+      char seduRGBOrder[4] {};
+      SeduMode seduMode {smMiniDMX};
+      Cinebars detectCineBars {cbBoth};
 
-      char* tvIp {nullptr};
-      int loglevel;
+      char* tvIp {};
+      int loglevel {0};
 
-      cLed* leds;
-      int ledCount;
+      cLed* leds {};
+      size_t ledCount {0};
 
       // functions
 

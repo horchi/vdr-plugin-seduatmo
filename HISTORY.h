@@ -3,12 +3,12 @@
  * seduatmo Plugin - Revision History
  * ----------------------------------------------
  *
- *  (c) 2012-2018 Jörg Wendel
+ *  (c) 2012-2022 Jörg Wendel
  *
  */
 
-#define _VERSION      "0.0.10"
-#define VERSION_DATE  "21.08.2020"
+#define _VERSION      "0.0.11"
+#define VERSION_DATE  "21.11.2022"
 
 #ifdef GIT_REV
 #  define VERSION _VERSION "-GIT" GIT_REV
@@ -18,6 +18,9 @@
 
 /*
  * ------------------------------------
+
+2022-11-21: Version 0.0.11
+  - added: Added support for softhdodroid
 
 2020-08-21: Version 0.0.10
   - added: Auto poweroff by TV state (option -t <ip|dns>)

@@ -23,38 +23,7 @@ cSeduConfig cfg;
 
 cSeduConfig::cSeduConfig()
 {
-   // to be configured
-
-   frequence = 25;
-   threshold = 17;
-   average = 10;
-   adjRed = 57;
-   adjGreen = 100;
-   adjBlue = 70;
-   gamma = 14;
-   xDeep = 2;
-   yDeep = 1;
-   black = 0;
-   detectCineBars = cbBoth;
-
-   seduMode = smMiniDMX;
    strcpy(seduRGBOrder, "BGR");
-   loglevel = 0;
-
-   showMainmenu = yes;
-   viewMode = vmAtmo;
-   effectSpeed = 500;
-
-   fixedR = 111;
-   fixedG = 101;
-   fixedB = 0;
-
-   // calculated
-
-   leds = 0;
-   ledCount = 0;
-   grabWidth = na;
-   grabHeight = na;
 }
 
 cSeduConfig::~cSeduConfig()

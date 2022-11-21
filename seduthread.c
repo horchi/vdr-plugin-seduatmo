@@ -189,6 +189,9 @@ int cSeduThread::grabImage()
       if (!softHdPlugin)
          softHdPlugin = cPluginManager::GetPlugin("softhddrm");
 
+      if (!softHdPlugin)
+         softHdPlugin = cPluginManager::GetPlugin("softhdodroid");
+
       int softHdGrabService = (softHdPlugin && softHdPlugin->Service(ATMO1_GRAB_SERVICE, 0));
 
       if (!softHdGrabService)
